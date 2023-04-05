@@ -1,5 +1,9 @@
 const inquirer = require("inquirer");
 const fs = require("fs");
+const { writeFile } = require("fs/promises");
+const Svg = require("./lib/svg.js");
+const { Circle, Triangle, Square } = require("./lib/shapes.js");
+const svg = new Svg();
 
 const questions = [
   {
@@ -13,15 +17,10 @@ const questions = [
     name: "textColor",
   },
   {
-    type: "input",
-    message: "Enter a text color",
-    name: "textColor",
-  },
-  {
     type: "list",
     message: "Choose a shape",
     choices: ["Circle", "Triangle", "Square"],
-    name: "Shape",
+    name: "shape",
   },
   {
     type: "input",
@@ -30,14 +29,27 @@ const questions = [
   },
 ];
 
-// function writeToFile(fileName, data) {
-//   fs.writeFile(fileName, generateMarkdown(data), (err) =>
-//     err ? console.error(err) : console.log("Success!")
-//   );
-// }
+function run(data) {
+  svg.setText(data.text, data.textColor);
+  let userShape;
+
+  if (data.shape === "Circle") {
+    userShape = new Circle();
+  } else if (data.shape === "Triangle") {
+    userShape = new Triangle();
+  } else if (data.shape === "Square") {
+    userShape = new Square();
+  }
+  userShape.setColor(data.shapeColor);
+  svg.setShape(userShape);
+  svg.render();
+  fs.writeFile("logo.svg", svg.render(), (err) =>
+    err ? console.error(err) : console.log("Success!")
+  );
+}
 
 function init() {
-  inquirer.prompt(questions).then((data) => console.log(data));
+  inquirer.prompt(questions).then((data) => run(data));
 }
 
 init();
